@@ -31,7 +31,7 @@ namespace SlackMud
             {
                 //get all items except the observer
                 var items = Content.Except(Enumerable.Repeat(msg.Item, 1));
-                var aggregator = Context.ActorOf(Props.Create(() => new Aggregator<string>(Sender, items, new GetName())));
+                Context.ActorOf(StringAggregator.Props("You see {0}", Sender, items, new GetName()));
             });
             Receive<Look>(msg => Container.Forward(new ContainerDescribe(Self)));
             Receive<GetName>(msg => Sender.Tell(GetName()));

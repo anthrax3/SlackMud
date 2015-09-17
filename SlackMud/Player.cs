@@ -22,7 +22,7 @@ namespace SlackMud
         {
             Receive<Inventory>(msg =>
             {
-                var aggregator = Context.ActorOf(Props.Create(() => new Aggregator<string>(Sender, Content, new GetName())));
+                Context.ActorOf(StringAggregator.Props("You have {0}", Sender, Content, new GetName()));
             });
         }
 

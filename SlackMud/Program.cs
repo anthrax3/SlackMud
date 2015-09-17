@@ -44,32 +44,19 @@ namespace SlackMud
                         break;
                     case "look":
                         {
-                            var names = await player1.Ask<string[]>(new Look());
-                            var joinNames = JoinNames(names);
-                            Console.WriteLine("You see " + joinNames);
+                            var description = await player1.Ask<string>(new Look());
+                            Console.WriteLine(description);
                             break;
                         }
                     case "inventory":
                         {
-                            var names = await player1.Ask<string[]>(new Inventory());
-                            var joinNames = JoinNames(names);
-                            Console.WriteLine("You have " + joinNames);
+                            var description = await player1.Ask<string>(new Inventory());
+                            Console.WriteLine(description);
                             break;
                         }
 
                 }
             }
-        }
-
-        protected static string JoinNames(string[] items)
-        {
-            if (items.Length == 0)
-                return "nothing";
-
-            if (items.Length == 1)
-                return items.First();
-
-            return string.Join(", ", items, 0, items.Length - 1) + " and " + items.LastOrDefault();
-        }
+        }       
     }
 }
