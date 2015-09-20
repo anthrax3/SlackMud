@@ -1,8 +1,6 @@
 ﻿using Akka.Actor;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SlackMud
@@ -13,7 +11,9 @@ namespace SlackMud
         {
             using (var system = ActorSystem.Create("Mud"))
             {
+                var output = system.ActorOf<OutputActor>();
                 var room1 = system.ActorOf(Props.Create(() => new NamedThing("the kitchen")));
+                var sword = system.ActorOf(Props.Create(() => new NamedThing("a sword")));
                 var backpack = system.ActorOf(Props.Create(() => new NamedThing("a backpack")));
                 var player1 = system.ActorOf(Props.Create(() => new Player("Allan")));
                 var player2 = system.ActorOf(Props.Create(() => new Player("Åke")));
@@ -21,7 +21,10 @@ namespace SlackMud
                 player1.Tell(new SetContainer(room1));
                 player2.Tell(new SetContainer(room1));
                 goblin.Tell(new SetContainer(room1));
+                sword.Tell(new SetContainer(room1));
                 backpack.Tell(new SetContainer(player1));
+                player1.Tell(new SetOutput(output));
+          //      player2.Tell(new SetOutput(output));
                 Run(player1).Wait();
             }
         }
@@ -31,27 +34,43 @@ namespace SlackMud
             Console.WriteLine("type; look, where, name, inventory");
             while (true)
             {
-                var command = Console.ReadLine();
+                var input = Console.ReadLine();
+                var parts = input.Split(new char[] {' '} , 2, StringSplitOptions.RemoveEmptyEntries);
+                var command = parts.FirstOrDefault();
                 switch (command)
                 {
+                    case "say":
+                        {
+                            var message = parts.ElementAtOrDefault(1);
+                            player1.Tell(new Say(message));
+                            break;
+                        }
                     case "where":
-                        var containerName = await player1.Ask<string>(new GetContainerName());
-                        Console.WriteLine($"You are in {containerName}");
-                        break;
+                        {
+                            player1.Tell(new Where());
+                            break;
+                        }
                     case "name":
-                        var name = await player1.Ask<string>(new GetName());
-                        Console.WriteLine($"Your name is {name}.");
-                        break;
+                        {
+                            var name = await player1.Ask<string>(new GetName());
+                            Console.WriteLine($"Your name is {name}.");
+                            break;
+                        }
+                        
                     case "look":
                         {
-                            var description = await player1.Ask<string>(new Look());
-                            Console.WriteLine(description);
+                            player1.Tell(new Look());
                             break;
                         }
                     case "inventory":
                         {
-                            var description = await player1.Ask<string>(new Inventory());
-                            Console.WriteLine(description);
+                            player1.Tell(new Inventory());
+                            break;
+                        }
+                    case "take":
+                        {
+                            var name = parts.ElementAtOrDefault(1);
+                            player1.Tell(new Take(name));
                             break;
                         }
 

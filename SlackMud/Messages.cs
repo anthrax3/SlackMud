@@ -7,6 +7,15 @@ using System.Threading.Tasks;
 
 namespace SlackMud
 {
+    public class SetOutput
+    {
+        public IActorRef Output { get; private set; }
+        public SetOutput(IActorRef output)
+        {
+            Output = output;
+        }
+    }
+
     public class SetContainer
     {
         public IActorRef Container { get; private set; }
@@ -27,10 +36,10 @@ namespace SlackMud
 
     public class ContainerDescribe
     {
-        public IActorRef Item { get; private set; }
+        public IActorRef Who { get; private set; }
         public ContainerDescribe(IActorRef item)
         {
-            Item = item;
+            Who = item;
         }
     }
 
@@ -47,7 +56,7 @@ namespace SlackMud
     {
     }
 
-    public class GetContainerName
+    public class Where
     {
     }
 
@@ -57,5 +66,96 @@ namespace SlackMud
 
     public class Inventory
     {
+    }
+
+    public class Say
+    {
+        public Say(string message)
+        {
+            Message = message;
+        }
+        public string Message { get;private set; }
+    }
+
+    public class ContainerSay
+    {
+        public ContainerSay(string message, IActorRef who)
+        {
+            Message = message;
+            Who = who;
+        }
+        public string Message { get; private set; }
+        public IActorRef Who { get;private set; }
+    }
+
+    public class Said
+    {
+        public Said(string message, IActorRef who)
+        {
+            Message = message;
+            Who = who;
+        }
+        public string Message { get; private set; }
+        public IActorRef Who { get; private set; }
+    }
+
+    public class Notify
+    {
+        public Notify(string message,IActorRef who = null)
+        {
+            Message = message;
+            Who = who;
+        }
+        public string Message { get;private set; }
+        public IActorRef Who { get; private set; }
+    }
+
+    public class ContainerNotify
+    {
+        public ContainerNotify(string message,IActorRef except)
+        {
+            Message = message;
+            Except = except;
+        }
+        public string Message { get; private set; }
+        public IActorRef Except { get; private set; }
+    }
+
+    public class FindObjectByName
+    {
+        public FindObjectByName(string name)
+        {
+            Name = name;
+        }
+        public string Name { get;private set; }
+    }
+
+    public class FoundObjectByName
+    {
+        public FoundObjectByName(IActorRef found,string name)
+        {
+            Item = found;
+            Name = name;
+        }
+        public IActorRef Item { get;private set; }
+        public string Name { get;private set; }
+    }
+
+    public class MatchName
+    {
+        public MatchName(string name)
+        {
+            Name = name;
+        }
+        public string Name { get; private set; }
+    }
+
+    public class Take
+    {
+        public Take(string name)
+        {
+            Name = name;
+        }
+        public string Name { get;private set; }
     }
 }

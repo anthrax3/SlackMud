@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Akka.Actor;
+
 namespace SlackMud
 {
     public class StringAggregator : ReceiveActor
@@ -34,7 +32,7 @@ namespace SlackMud
                 {
                     var names = replies.Values.ToArray();
                     var joined = JoinNames(names);
-                    replyTo.Tell(string.Format(format, joined));
+                    replyTo.Tell(new Notify(string.Format(format, joined)));
                     Context.Stop(Self);
                 }
             });

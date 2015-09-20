@@ -1,11 +1,4 @@
-﻿using Akka.Actor;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SlackMud
+﻿namespace SlackMud
 {
     public class Player : Living
     {
@@ -22,7 +15,7 @@ namespace SlackMud
         {
             Receive<Inventory>(msg =>
             {
-                Context.ActorOf(StringAggregator.Props("You have {0}", Sender, Content, new GetName()));
+                Context.ActorOf(StringAggregator.Props("You have {0}", Output, Content, new GetName()));
             });
         }
 
