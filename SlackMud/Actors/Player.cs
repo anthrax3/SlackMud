@@ -10,10 +10,7 @@
 
         protected override void Alive()
         {
-            Receive<Inventory>(msg =>
-            {
-                Context.ActorOf(StringAggregator.Props("You have {0}", Output, MyContent, new GetName()));
-            });
+            Receive<Inventory>(msg => StringAggregator.Run("You have {0}", Output, MyContent, new GetName()));
         }
 
         protected override void Dead()

@@ -6,9 +6,11 @@ namespace SlackMud
 {
     public class Aggregator<TMsg> : ReceiveActor
     {
-        public static Props Props(IActorRef replyTo, IEnumerable<IActorRef> targets, object message)
+        public static void Run(IActorRef replyTo, IEnumerable<IActorRef> targets, object message)
         {
-            return Akka.Actor.Props.Create(() => new Aggregator<TMsg>(replyTo, targets, message));
+            var props = Akka.Actor.Props.Create(() => new Aggregator<TMsg>(replyTo, targets, message));
+            props.ActorOf();
+
         }
         public Aggregator(IActorRef replyTo, IEnumerable<IActorRef> targets, object message)
         {
