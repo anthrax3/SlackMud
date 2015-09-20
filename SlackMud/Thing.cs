@@ -28,11 +28,13 @@ namespace SlackMud
             //container commands
             Receive<SetContainer>(msg =>
             {
-                Container?.Tell(new ContainerRemove(Self));
+                Container?.Tell(new ContainerRemove(Self), Sender);
                 //TODO: this can be racy
                 Container = msg.Container;
-                Container.Tell(new ContainerAdd(Self));
+                Container.Tell(new ContainerAdd(Self), Sender);
             });
+
+            //add an item to the container, notify others in the same container
             Receive<ContainerAdd>(msg => {
                 msg
                 .Item
@@ -41,6 +43,8 @@ namespace SlackMud
 
                 Content.Add(msg.Item);
             });
+
+            //remove from container, notify others in the same container
             Receive<ContainerRemove>(msg =>
             {
                 Content.Remove(msg.Item);
@@ -50,19 +54,25 @@ namespace SlackMud
                 .GetName(name => new ContainerNotify($"{name} disappears", msg.Item))
                 .PipeTo(Self);
             });
+
+            //aggregate names of content and notify sender
             Receive<ContainerDescribe>(msg => AggregateAndNotify("You see {0}", msg.Who, Content.Except(msg.Who), new GetName()));
+
+            //get name of the one that talks, notify all others
             Receive<ContainerSay>(msg => {
                 msg
                 .Who
                 .GetName(name => new ContainerNotify($"{name} says: {msg.Message}", msg.Who))
                 .PipeTo(Self);
             });
+
+            //broadcast notification to everyone in this container
             Receive<ContainerNotify>(msg =>
             {
                 var targets = msg.Except != null ? Content.Except(msg.Except) : Content;
                 targets.TellAll(new Notify(msg.Message));
             });
-            Receive<FindObjectByName>(msg => Context.ActorOf(FindByNameAggregator.Props(Sender, Content, msg.Name)));            
+            Receive<FindObjectByName>(msg => FindByNameAggregator.Props(Sender, Content, msg.Name).ActorOf());            
 
             //actions
             Receive<Say>(msg =>
@@ -77,18 +87,40 @@ namespace SlackMud
                 .GetName(name => new Notify($"You are in {name}"))
                 .PipeTo(Self);
             });
-            Receive<Take>(async msg =>
+            Receive<Take>(msg =>
             {
-                var result = await Container.Ask<FoundObjectByName>(new FindObjectByName(msg.Name));
-                if (result == null)
+                var self = Self;
+                Container.Ask<FoundObjectByName>(new FindObjectByName(msg.Name))
+                .ContinueWith(t =>
                 {
-                    Self.Tell(new Notify($"Could not find {msg.Name}"));
-                }
-                else
+                    if (t.Result == null)
+                    {
+                        self.Tell(new Notify($"Could not find {msg.Name}"));
+                    }
+                    else
+                    {
+                        self.Tell(new Notify($"You take {t.Result.Name}"));
+                        t.Result.Item.Tell(new SetContainer(self));
+                    }
+                });
+            });
+            Receive<Drop>(msg =>
+            {
+                var self = Self;
+                var container = Container;
+                Self.Ask<FoundObjectByName>(new FindObjectByName(msg.Name))
+                .ContinueWith(t =>
                 {
-                    Self.Tell(new Notify($"You take {result.Name}"));
-                    result.Item.Tell(new SetContainer(Self));
-                }
+                    if (t.Result == null)
+                    {
+                        self.Tell(new Notify($"Could not find {msg.Name}"));
+                    }
+                    else
+                    {
+                        self.Tell(new Notify($"You drop {t.Result.Name}"));
+                        t.Result.Item.Tell(new SetContainer(container));
+                    }
+                });                
             });
 
             //output stream

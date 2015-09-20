@@ -40,6 +40,7 @@ namespace SlackMud
                 switch (command)
                 {
                     case "say":
+                    case "s":
                         {
                             var message = parts.ElementAtOrDefault(1);
                             player1.Tell(new Say(message));
@@ -58,19 +59,29 @@ namespace SlackMud
                         }
                         
                     case "look":
+                    case "l":
                         {
                             player1.Tell(new Look());
                             break;
                         }
                     case "inventory":
+                    case "inv":
                         {
                             player1.Tell(new Inventory());
                             break;
                         }
                     case "take":
+                    case "t":
                         {
                             var name = parts.ElementAtOrDefault(1);
                             player1.Tell(new Take(name));
+                            break;
+                        }
+                    case "drop":
+                    case "d":
+                        {
+                            var name = parts.ElementAtOrDefault(1);
+                            player1.Tell(new Drop(name));
                             break;
                         }
 

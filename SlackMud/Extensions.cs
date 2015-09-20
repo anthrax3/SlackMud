@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Akka;
+using Akka.Actor.Internal;
 
 namespace SlackMud
 {
@@ -30,6 +32,11 @@ namespace SlackMud
             {
                 target.Tell(message);
             }
+        }
+
+        public static IActorRef ActorOf(this Props self)
+        {
+            return InternalCurrentActorCellKeeper.Current.ActorOf(self);
         }
     }
 }

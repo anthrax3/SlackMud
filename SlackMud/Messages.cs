@@ -158,4 +158,13 @@ namespace SlackMud
         }
         public string Name { get;private set; }
     }
+
+    public class Drop
+    {
+        public Drop(string name)
+        {
+            Name = name;
+        }
+        public string Name { get; private set; }
+    }
 }
