@@ -9,9 +9,10 @@ namespace SlackMud
     {
         public static void Run(IActorRef replyTo, IEnumerable<IActorRef> targets, string nameToFind)
         {
-            var props = Akka.Actor.Props.Create(() => new FindByNameAggregator(replyTo, targets, nameToFind));
+            var props = Props.Create(() => new FindByNameAggregator(replyTo, targets, nameToFind));
             props.ActorOf();
         }
+
         public FindByNameAggregator(IActorRef replyTo, IEnumerable<IActorRef> targets, string nameToFind)
         {
             var targetArr = targets.ToArray();

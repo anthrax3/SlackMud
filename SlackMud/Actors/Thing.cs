@@ -14,6 +14,9 @@ namespace SlackMud
         protected IActorRef MyContainer { get; set; }
         protected HashSet<IActorRef> MyContent { get; set; } = new HashSet<IActorRef>();
         public string Name { get; set; } = "unknown";
+        public IActorRef Target { get; set; }
+        public ICancelable AttackTimer { get; set; }
+
 
         public Thing()
         {
@@ -28,6 +31,7 @@ namespace SlackMud
         protected virtual void Ambient()
         {
             //api
+            //TODO: name should probably be refactored to contain aliases too, so a list instead of a single name
             Receive<GetName>(msg => Sender.Tell(Name));
 
             //container commands
@@ -42,9 +46,10 @@ namespace SlackMud
             //add an item to the container, notify others in the same container
             Receive<ContainerAdd>(msg =>
             {
+                var sender = Sender;
                 msg
                 .ObjectToAdd
-                .GetName(name => new ContainerNotify($"{name} appears", msg.ObjectToAdd))
+                .GetName(name => new ContainerNotify($"{name} appears", msg.ObjectToAdd, sender))
                 .PipeTo(Self);
 
                 MyContent.Add(msg.ObjectToAdd);
@@ -54,10 +59,10 @@ namespace SlackMud
             Receive<ContainerRemove>(msg =>
             {
                 MyContent.Remove(msg.ObjectToRemove);
-
+                var sender = Sender;
                 msg
                 .ObjectToRemove
-                .GetName(name => new ContainerNotify($"{name} disappears", msg.ObjectToRemove))
+                .GetName(name => new ContainerNotify($"{name} disappears", msg.ObjectToRemove, sender))
                 .PipeTo(Self);
             });
 
@@ -79,6 +84,7 @@ namespace SlackMud
             //broadcast notification to everyone in this container
             Receive<ContainerNotify>(msg => ContainerNotify(msg, MyContent));
             Receive<FindObjectByName>(msg => FindObjectByName(msg, Sender, MyContent));
+
             //actions
             Receive<Say>(msg => Say(msg, Self, MyContainer));
             Receive<Look>(msg => Look(Self, MyContainer));
@@ -90,6 +96,35 @@ namespace SlackMud
             //output stream
             Receive<Notify>(msg => Output?.Tell(msg));
             Receive<SetOutput>(msg => Output = msg.Output);
+
+            Receive<Fight>(msg =>
+            {
+                var self = Self;
+                MyContainer.FindContainedObjectByName(msg.TargetName, found =>
+                {
+                    if (found.Item == null)
+                    {
+                        self.Tell(new Notify($"Could not find {msg.TargetName}"));
+                        return;
+                    }
+                    else
+                    {
+                        MyContainer.Tell(new ContainerNotify($"{Name} attacks {found.Name}", self));
+                        self.Tell(new Notify($"You start attacking {found.Name}"));
+                        self.Tell(new SetTarget(found.Item));
+                    }
+                });
+            });
+            Receive<SetTarget>(msg =>
+            {
+                Target = msg.Target;
+                AttackTimer?.Cancel();
+                AttackTimer = Context.System.Scheduler.ScheduleTellRepeatedlyCancelable(TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), Self, new Attack(), Self);
+            });
+            Receive<Attack>(msg =>
+            {
+                Target.GetName(name => new Notify($"You swing at {name}!")).PipeTo(Self);
+            });
         }
 
         //Why static handlers? this prevents any state mutations of the actor inside any async workflows.
@@ -102,7 +137,6 @@ namespace SlackMud
 
         private static void FindObjectByName(FindObjectByName msg, IActorRef Sender, IEnumerable<IActorRef> MyContent)
         {
-
             FindByNameAggregator.Run(Sender, MyContent, msg.Name);
         }
 
@@ -136,11 +170,15 @@ namespace SlackMud
                 }
                 else
                 {
+                    //TODO: this actor should negotiate with the target if the target can be taken
+                    //TODO: this actor should check if the object can fit into ContainerVolume
+                    //TODO: this actor should check if you are strong enough to take the target
+
                     Self.Tell(new Notify($"You take {findResult.Name}"));
                     //TODO: this is racy, potentially two people could take the same item at the same time
                     //SetContainer should probably even contan the current Container.
                     //if the objects container is different from the passed in value, there is a race condition
-                    findResult.Item.Tell(new SetContainer(Self));
+                    findResult.Item.Tell(new SetContainer(Self),Self);
                 }
             });
         }
@@ -157,7 +195,7 @@ namespace SlackMud
                 else
                 {
                     Self.Tell(new Notify($"You drop {findResult.Name}"));
-                    findResult.Item.Tell(new SetContainer(MyContainer));
+                    findResult.Item.Tell(new SetContainer(MyContainer),Self);
                 }
             });
         }
@@ -165,6 +203,7 @@ namespace SlackMud
         private static void Put(Put msg, IActorRef Self, IActorRef MyContainer)
         {
             var self = Self;
+            //TODO: this can be optimized to avoid ask
             var t1 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.TargetName));
             var c1 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.ContainerName));
             var t2 = Self.Ask<FoundObjectByName>(new FindObjectByName(msg.TargetName));
@@ -189,7 +228,7 @@ namespace SlackMud
                 }
 
                 self.Tell(new Notify($"You put {t.Result.Name} in {c.Result.Name}"));
-                t.Result.Item.Tell(new SetContainer(c.Result.Item));
+                t.Result.Item.Tell(new SetContainer(c.Result.Item), Self);
             });
         }
     }

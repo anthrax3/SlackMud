@@ -15,8 +15,8 @@ namespace SlackMud
                 var room1 = system.ActorOf(Props.Create(() => new Thing("the kitchen")));
                 var sword = system.ActorOf(Props.Create(() => new Weapon("a sword")));
                 var backpack = system.ActorOf(Props.Create(() => new Thing("a backpack")));
-                var player1 = system.ActorOf(Props.Create(() => new Player("Allan")));
-                var player2 = system.ActorOf(Props.Create(() => new Player("Åke")));
+                var player1 = system.ActorOf(Props.Create(() => new Player("Bilbo")));
+                var player2 = system.ActorOf(Props.Create(() => new Player("Gandalf")));
                 var goblin = system.ActorOf(Props.Create(() => new Goblin()));
                 player1.Tell(new SetContainer(room1));
                 player2.Tell(new SetContainer(room1));
@@ -90,6 +90,14 @@ namespace SlackMud
                             var what = commands.ElementAtOrDefault(0);
                             var container = commands.ElementAtOrDefault(1);
                             player1.Tell(new Put(what, container));
+                            break;
+                        }
+                    case "kill":
+                    case "attack":
+                    case "fight":
+                        {
+                            var name = parts.ElementAtOrDefault(1);
+                            player1.Tell(new Fight(name));
                             break;
                         }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Akka.Actor;
 
 namespace SlackMud
 {
@@ -35,7 +36,11 @@ namespace SlackMud
             });
         }
 
-        protected abstract void Alive();
+        protected virtual void Alive()
+        {
+            
+            
+        }
         protected abstract void Dead();
     }
 }

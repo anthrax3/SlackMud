@@ -74,7 +74,7 @@ namespace SlackMud
         {
             Message = message;
         }
-        public string Message { get;private set; }
+        public string Message { get; private set; }
     }
 
     public class ContainerSay
@@ -85,7 +85,7 @@ namespace SlackMud
             Who = who;
         }
         public string Message { get; private set; }
-        public IActorRef Who { get;private set; }
+        public IActorRef Who { get; private set; }
     }
 
     public class Said
@@ -101,24 +101,24 @@ namespace SlackMud
 
     public class Notify
     {
-        public Notify(string message,IActorRef who = null)
+        public Notify(string message, IActorRef who = null)
         {
             Message = message;
             Who = who;
         }
-        public string Message { get;private set; }
+        public string Message { get; private set; }
         public IActorRef Who { get; private set; }
     }
 
     public class ContainerNotify
     {
-        public ContainerNotify(string message,IActorRef except)
+        public ContainerNotify(string message, params IActorRef[] except)
         {
             Message = message;
             Except = except;
         }
         public string Message { get; private set; }
-        public IActorRef Except { get; private set; }
+        public IActorRef[] Except { get; private set; }
     }
 
     public class FindObjectByName
@@ -127,18 +127,18 @@ namespace SlackMud
         {
             Name = name;
         }
-        public string Name { get;private set; }
+        public string Name { get; private set; }
     }
 
     public class FoundObjectByName
     {
-        public FoundObjectByName(IActorRef found,string name)
+        public FoundObjectByName(IActorRef found, string name)
         {
             Item = found;
             Name = name;
         }
-        public IActorRef Item { get;private set; }
-        public string Name { get;private set; }
+        public IActorRef Item { get; private set; }
+        public string Name { get; private set; }
     }
 
     public class MatchName
@@ -156,7 +156,7 @@ namespace SlackMud
         {
             NameToFind = name;
         }
-        public string NameToFind { get;private set; }
+        public string NameToFind { get; private set; }
     }
 
     public class Drop
@@ -170,12 +170,35 @@ namespace SlackMud
 
     public class Put
     {
-        public Put(string targetName,string containerName)
+        public Put(string targetName, string containerName)
         {
             TargetName = targetName;
             ContainerName = containerName;
         }
         public string TargetName { get; private set; }
         public string ContainerName { get; private set; }
+    }
+
+    public class Fight
+    {
+        public Fight(string target)
+        {
+            TargetName = target;
+        }
+        public string TargetName { get; private set; }
+    }
+
+    public class SetTarget
+    {
+        public SetTarget(IActorRef target)
+        {
+            Target = target;
+        }
+
+        public IActorRef Target { get; private set; }
+    }
+
+    public class Attack
+    {
     }
 }
