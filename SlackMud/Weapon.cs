@@ -13,7 +13,7 @@ namespace SlackMud
         Frost,
         Crushing,
         Cutting,
-        Peircing
+        Piercing
     }
 
     public class Weapon : Thing
