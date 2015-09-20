@@ -143,24 +143,30 @@ namespace SlackMud
             {
                 var self = Self;
                 var t1 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.TargetName));
-                var t2 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.ContainerName));
+                var c1 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.ContainerName));
+                var t2 = Self.Ask<FoundObjectByName>(new FindObjectByName(msg.TargetName));
+                var c2 = Self.Ask<FoundObjectByName>(new FindObjectByName(msg.ContainerName));
 
-                Task.WhenAll(t1, t2).ContinueWith(tasks =>
+                Task.WhenAll(t1, t2, c1, c2).ContinueWith(tasks =>
                  {
-                     if (t1.Result.Item == null)
+                     //prioritize items in inventory first
+                     var t = t2?.Result?.Item != null ? t2 : t1;
+                     var c = c2?.Result?.Item != null ? c2 : c1;
+
+                     if (t.Result.Item == null)
                      {
                          self.Tell(new Notify($"Could not find {msg.TargetName}"));
                          return;
                      }
 
-                     if (t2.Result.Item == null)
+                     if (c.Result.Item == null)
                      {
                          self.Tell(new Notify($"Could not find {msg.ContainerName}"));
                          return;
                      }
 
-                     self.Tell(new Notify($"You put {t1.Result.Name} in {t2.Result.Name}"));
-                     t1.Result.Item.Tell(new SetContainer(t2.Result.Item));
+                     self.Tell(new Notify($"You put {t.Result.Name} in {c.Result.Name}"));
+                     t.Result.Item.Tell(new SetContainer(c.Result.Item));
                  });
             });
 
