@@ -97,7 +97,7 @@ namespace SlackMud
                     case "fight":
                         {
                             var name = parts.ElementAtOrDefault(1);
-                            player1.Tell(new Fight(name));
+                            player1.Tell(new StartFight(name));
                             break;
                         }
 

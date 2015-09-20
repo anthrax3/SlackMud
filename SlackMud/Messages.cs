@@ -179,9 +179,9 @@ namespace SlackMud
         public string ContainerName { get; private set; }
     }
 
-    public class Fight
+    public class StartFight
     {
-        public Fight(string target)
+        public StartFight(string target)
         {
             TargetName = target;
         }
@@ -200,5 +200,24 @@ namespace SlackMud
 
     public class Attack
     {
+    }
+
+    public class TakeDamage
+    {
+        public TakeDamage(int value)
+        {
+            Value = value;
+        }
+        public int Value { get;private set; }
+    }
+
+    public class NotifyCombatStatus
+    {
+
+    }
+
+    public class Died
+    {
+
     }
 }

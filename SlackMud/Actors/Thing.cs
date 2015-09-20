@@ -16,7 +16,7 @@ namespace SlackMud
         public string Name { get; set; } = "unknown";
         public IActorRef Target { get; set; }
         public ICancelable AttackTimer { get; set; }
-
+        
 
         public Thing()
         {
@@ -30,6 +30,7 @@ namespace SlackMud
 
         protected virtual void Ambient()
         {
+             Random rnd = new Random(GetHashCode());
             //api
             //TODO: name should probably be refactored to contain aliases too, so a list instead of a single name
             Receive<GetName>(msg => Sender.Tell(Name));
@@ -97,23 +98,9 @@ namespace SlackMud
             Receive<Notify>(msg => Output?.Tell(msg));
             Receive<SetOutput>(msg => Output = msg.Output);
 
-            Receive<Fight>(msg =>
+            Receive<StartFight>(msg =>
             {
-                var self = Self;
-                MyContainer.FindContainedObjectByName(msg.TargetName, found =>
-                {
-                    if (found.Item == null)
-                    {
-                        self.Tell(new Notify($"Could not find {msg.TargetName}"));
-                        return;
-                    }
-                    else
-                    {
-                        MyContainer.Tell(new ContainerNotify($"{Name} attacks {found.Name}", self));
-                        self.Tell(new Notify($"You start attacking {found.Name}"));
-                        self.Tell(new SetTarget(found.Item));
-                    }
-                });
+                StartFight(msg,Name,Self,MyContainer);
             });
             Receive<SetTarget>(msg =>
             {
@@ -123,9 +110,56 @@ namespace SlackMud
             });
             Receive<Attack>(msg =>
             {
+                var dmg = rnd.Next(1, 10);
+                Target.Tell(new TakeDamage(dmg));
+
                 Target.GetName(name => new Notify($"You swing at {name}!")).PipeTo(Self);
             });
+            Receive<TakeDamage>(msg =>
+            {
+                ProcessDamage(msg);
+            });
+            Receive<NotifyCombatStatus>(msg =>
+            {
+                NotifyCombatStatus();
+            });
+            Receive<Died>(msg =>
+            {
+                if (Sender == Target)
+                {
+                    AttackTimer?.Cancel();
+                }
+            });
         }
+
+        protected virtual void NotifyCombatStatus()
+        {
+
+        }
+
+        protected virtual void ProcessDamage(TakeDamage msg)
+        {
+
+        }
+
+        private static void StartFight(StartFight msg,string Name ,IActorRef Self, IActorRef MyContainer)
+        {
+            MyContainer.FindContainedObjectByName(msg.TargetName, found =>
+            {
+                if (found.Item == null)
+                {
+                    Self.Tell(new Notify($"Could not find {msg.TargetName}"));
+                    return;
+                }
+                else
+                {
+                    MyContainer.Tell(new ContainerNotify($"{Name} attacks {found.Name}", Self));
+                    Self.Tell(new Notify($"You start attacking {found.Name}"));
+                    Self.Tell(new SetTarget(found.Item));
+                }
+            });
+        }
+
 
         //Why static handlers? this prevents any state mutations of the actor inside any async workflows.
         //the actor is the entrypoint which then delegates to various async workflows
