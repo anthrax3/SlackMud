@@ -13,7 +13,7 @@ namespace SlackMud
             {
                 var output = system.ActorOf<OutputActor>();
                 var room1 = system.ActorOf(Props.Create(() => new Thing("the kitchen")));
-                var sword = system.ActorOf(Props.Create(() => new Thing("a sword")));
+                var sword = system.ActorOf(Props.Create(() => new Weapon("a sword")));
                 var backpack = system.ActorOf(Props.Create(() => new Thing("a backpack")));
                 var player1 = system.ActorOf(Props.Create(() => new Player("Allan")));
                 var player2 = system.ActorOf(Props.Create(() => new Player("Åke")));

@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,15 +15,26 @@ namespace SlackMud
         {
             var targetArr = targets.ToArray();
             var replies = new Dictionary<IActorRef, string>();
-            foreach (var target in targetArr)
-            {
-                target.Tell(new GetName(), Self);
-            }
+
             if (targetArr.Length == 0)
             {
                 replyTo.Tell(new FoundObjectByName(null,null));
                 Context.Stop(Self);
             }
+
+            foreach (var target in targetArr)
+            {
+                target.Tell(new GetName(), Self);
+            }
+
+            SetReceiveTimeout(TimeSpan.FromSeconds(1));
+
+            //in case we get no results, timeout
+            Receive<ReceiveTimeout>(msg =>
+            {
+                replyTo.Tell(new FoundObjectByName(null, null));
+                Context.Stop(Self);
+            });
 
             Receive<string>(msg =>
             {
