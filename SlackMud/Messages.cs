@@ -167,4 +167,15 @@ namespace SlackMud
         }
         public string Name { get; private set; }
     }
+
+    public class Put
+    {
+        public Put(string targetName,string containerName)
+        {
+            TargetName = targetName;
+            ContainerName = containerName;
+        }
+        public string TargetName { get; private set; }
+        public string ContainerName { get; private set; }
+    }
 }

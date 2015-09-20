@@ -139,6 +139,30 @@ namespace SlackMud
                     }
                 });                
             });
+            Receive<Put>(msg =>
+            {
+                var self = Self;
+                var t1 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.TargetName));
+                var t2 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.ContainerName));
+
+                Task.WhenAll(t1, t2).ContinueWith(tasks =>
+                 {
+                     if (t1.Result.Item == null)
+                     {
+                         self.Tell(new Notify($"Could not find {msg.TargetName}"));
+                         return;
+                     }
+
+                     if (t2.Result.Item == null)
+                     {
+                         self.Tell(new Notify($"Could not find {msg.ContainerName}"));
+                         return;
+                     }
+
+                     self.Tell(new Notify($"You put {t1.Result.Name} in {t2.Result.Name}"));
+                     t1.Result.Item.Tell(new SetContainer(t2.Result.Item));
+                 });
+            });
 
             //output stream
             Receive<Notify>(msg => Output?.Tell(msg));            

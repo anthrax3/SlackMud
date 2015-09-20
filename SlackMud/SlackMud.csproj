@@ -51,19 +51,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Aggregator.cs" />
+    <Compile Include="Actors\Aggregator.cs" />
     <Compile Include="Extensions.cs" />
-    <Compile Include="FindByNameAggregator.cs" />
-    <Compile Include="Goblin.cs" />
-    <Compile Include="Living.cs" />
+    <Compile Include="Actors\FindByNameAggregator.cs" />
+    <Compile Include="Actors\Goblin.cs" />
+    <Compile Include="Actors\Living.cs" />
     <Compile Include="Messages.cs" />
     <Compile Include="OutputActor.cs" />
-    <Compile Include="Player.cs" />
+    <Compile Include="Actors\Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StringAggregator.cs" />
-    <Compile Include="Thing.cs" />
-    <Compile Include="Weapon.cs" />
+    <Compile Include="Actors\StringAggregator.cs" />
+    <Compile Include="Actors\Thing.cs" />
+    <Compile Include="Actors\Weapon.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

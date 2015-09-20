@@ -84,6 +84,14 @@ namespace SlackMud
                             player1.Tell(new Drop(name));
                             break;
                         }
+                    case "put":
+                        {
+                            var commands = parts.ElementAtOrDefault(1).Split(new[] { " in " },StringSplitOptions.RemoveEmptyEntries);
+                            var what = commands.ElementAtOrDefault(0);
+                            var container = commands.ElementAtOrDefault(1);
+                            player1.Tell(new Put(what, container));
+                            break;
+                        }
 
                 }
             }
