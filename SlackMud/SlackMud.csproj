@@ -57,7 +57,6 @@
     <Compile Include="Goblin.cs" />
     <Compile Include="Living.cs" />
     <Compile Include="Messages.cs" />
-    <Compile Include="NamedThing.cs" />
     <Compile Include="OutputActor.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />

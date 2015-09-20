@@ -27,17 +27,17 @@ namespace SlackMud
 
     public class ContainerRemove
     {
-        public IActorRef Item { get; private set; }
+        public IActorRef ObjectToRemove { get; private set; }
         public ContainerRemove(IActorRef item)
         {
-            Item = item;
+            ObjectToRemove = item;
         }
     }
 
-    public class ContainerDescribe
+    public class ContainerLook
     {
         public IActorRef Who { get; private set; }
-        public ContainerDescribe(IActorRef item)
+        public ContainerLook(IActorRef item)
         {
             Who = item;
         }
@@ -45,10 +45,10 @@ namespace SlackMud
 
     public class ContainerAdd
     {
-        public IActorRef Item { get; private set; }
+        public IActorRef ObjectToAdd { get; private set; }
         public ContainerAdd(IActorRef item)
         {
-            Item = item;
+            ObjectToAdd = item;
         }
     }
 
@@ -154,9 +154,9 @@ namespace SlackMud
     {
         public Take(string name)
         {
-            Name = name;
+            NameToFind = name;
         }
-        public string Name { get;private set; }
+        public string NameToFind { get;private set; }
     }
 
     public class Drop

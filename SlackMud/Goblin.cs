@@ -8,9 +8,12 @@ namespace SlackMud
 {
     public class Goblin : Living
     {
-        protected override int GetMaxHP() => 50;
+        public Goblin()
+        {
+            Name = "a goblin";
+        }
 
-        protected override string GetName() => "a goblin";
+        protected override int GetMaxHP() => 50;
 
         protected override void Alive()
         {

@@ -32,7 +32,7 @@ namespace SlackMud
                 else if (toFind.StartsWith("a "))
                     toFind = toFind.Substring(2);
                 else if (toFind.StartsWith("an "))
-                    toFind = toFind.Substring(2);
+                    toFind = toFind.Substring(3);
 
                 if (msg.ToLowerInvariant().Contains(toFind))
                 {

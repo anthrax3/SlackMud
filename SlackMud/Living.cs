@@ -11,7 +11,7 @@ namespace SlackMud
         protected int HP { get; set; }
         protected abstract int GetMaxHP();
 
-        public Living()
+        public Living() 
         {
             HP = GetMaxHP();
             BecomeAlive();

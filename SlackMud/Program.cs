@@ -12,9 +12,9 @@ namespace SlackMud
             using (var system = ActorSystem.Create("Mud"))
             {
                 var output = system.ActorOf<OutputActor>();
-                var room1 = system.ActorOf(Props.Create(() => new NamedThing("the kitchen")));
-                var sword = system.ActorOf(Props.Create(() => new NamedThing("a sword")));
-                var backpack = system.ActorOf(Props.Create(() => new NamedThing("a backpack")));
+                var room1 = system.ActorOf(Props.Create(() => new Thing("the kitchen")));
+                var sword = system.ActorOf(Props.Create(() => new Thing("a sword")));
+                var backpack = system.ActorOf(Props.Create(() => new Thing("a backpack")));
                 var player1 = system.ActorOf(Props.Create(() => new Player("Allan")));
                 var player2 = system.ActorOf(Props.Create(() => new Player("Åke")));
                 var goblin = system.ActorOf(Props.Create(() => new Goblin()));
