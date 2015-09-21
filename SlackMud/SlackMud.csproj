@@ -61,7 +61,7 @@
     <Compile Include="Actors\Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Actors\Aggregator.GetStrings.cs" />
+    <Compile Include="Actors\Aggregator.JoinStrings.cs" />
     <Compile Include="Actors\Thing.cs" />
     <Compile Include="Actors\Weapon.cs" />
   </ItemGroup>
