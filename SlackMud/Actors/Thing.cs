@@ -117,7 +117,7 @@ namespace SlackMud
                 Target
                 .GetName()
                 .ContinueWith(t => new Notify($"You swing at {t.Result}!"))
-                .PipeTo(Self);
+                .PipeTo(Self);                
             });
             Receive<TakeDamage>(msg =>
             {

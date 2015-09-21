@@ -26,7 +26,7 @@ namespace SlackMud.Actors
             {
                 MyContainer.Tell(new ContainerNotify($"{Name} is decomposing", Self));
                 times++;
-                if (times == 4)
+                if (times == 3)
                 {
                     timer.Cancel();
                     MyContainer.Tell(new ContainerNotify($"{Name} has turned to dust", Self));
