@@ -59,14 +59,18 @@ namespace SlackMud
                 var sender = Sender;
                 msg
                 .ObjectToRemove
-                .GetName(name => new ContainerNotify($"{name} disappears", msg.ObjectToRemove, sender))
+                .GetName()
+                .ContinueWith(t => new ContainerNotify($"{t.Result} disappears", msg.ObjectToRemove, sender))
                 .PipeTo(Self);
             });
 
             //aggregate names of content and notify sender
             Receive<ContainerLook>(msg =>
             {
-                StringAggregator.Run("You see {0}", msg.Who, MyContent.Except(msg.Who), new GetName());
+                MyContent.Except(msg.Who)
+                .GetNames()
+                .ContinueWith(t => new Notify($"You see {t.Result}"))
+                .PipeTo(msg.Who);
             });
 
             //get name of the one that talks, notify all others
@@ -74,7 +78,8 @@ namespace SlackMud
             {
                 msg
                 .Who
-                .GetName(name => new ContainerNotify($"{name} says: {msg.Message}", msg.Who))
+                .GetName()
+                .ContinueWith(t => new ContainerNotify($"{t.Result} says: {msg.Message}", msg.Who))
                 .PipeTo(Self);
             });
 
@@ -109,7 +114,10 @@ namespace SlackMud
                 var dmg = rnd.Next(1, 10);
                 Target.Tell(new TakeDamage(dmg));
 
-                Target.GetName(name => new Notify($"You swing at {name}!")).PipeTo(Self);
+                Target
+                .GetName()
+                .ContinueWith(t => new Notify($"You swing at {t.Result}!"))
+                .PipeTo(Self);
             });
             Receive<TakeDamage>(msg =>
             {
@@ -131,7 +139,8 @@ namespace SlackMud
         private static void NotifyObjectAppears(IActorRef who,IActorRef self, IActorRef sender)
         {
             who
-            .GetName(name => new ContainerNotify($"{name} appears", who, sender))
+            .GetName()
+            .ContinueWith(t => new ContainerNotify($"{t.Result} appears", who, sender))
             .PipeTo(self);
         }
 
@@ -174,7 +183,7 @@ namespace SlackMud
 
         private static void FindObjectByName(FindObjectByName msg, IActorRef Sender, IEnumerable<IActorRef> MyContent)
         {
-            FindByNameAggregator.Run(Sender, MyContent, msg.Name);
+            Aggregator.FindByName(MyContent, msg.Name).PipeTo(Sender);
         }
 
         private static void Say(Say msg, IActorRef Self, IActorRef MyContainer)
@@ -192,7 +201,8 @@ namespace SlackMud
         private static void Where(IActorRef Self, IActorRef MyContainer)
         {
             MyContainer
-            .GetName(name => new Notify($"You are in {name}"))
+            .GetName()
+            .ContinueWith(t => new Notify($"You are in {t.Result}"))
             .PipeTo(Self);
         }
 

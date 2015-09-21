@@ -21,9 +21,14 @@ namespace SlackMud
             return self.Except(except.Yield());
         }
 
-        public static Task<object> GetName(this IActorRef self,Func<string,object> body)
+        public static Task<string> GetNames(this IEnumerable<IActorRef> self)
         {
-            return self.Ask<string>(new GetName()).ContinueWith(t => body(t.Result));
+            return Aggregator.JoinNames(self);
+        }
+
+        public static Task<string> GetName(this IActorRef self)
+        {
+            return self.Ask<string>(new GetName());
         }
 
         public static Task FindContainedObjectByName(this IActorRef self,string name, Action<FindObjectByNameResult> body)

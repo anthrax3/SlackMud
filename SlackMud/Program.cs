@@ -72,6 +72,7 @@ namespace SlackMud
                         }
                     case "take":
                     case "t":
+                    case "get":
                         {
                             var name = parts.ElementAtOrDefault(1);
                             player1.Tell(new Take(name));

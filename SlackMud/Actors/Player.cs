@@ -1,4 +1,6 @@
-﻿namespace SlackMud
+﻿using Akka.Actor;
+
+namespace SlackMud
 {
     public class Player : Living
     {
@@ -10,7 +12,12 @@
 
         protected override void Alive()
         {
-            Receive<Inventory>(msg => StringAggregator.Run("You have {0}", Output, MyContent, new GetName()));
+            Receive<Inventory>(msg =>
+            {
+                MyContent.GetNames()
+                .ContinueWith(t => new Notify($"You have {t.Result}"))
+                .PipeTo(Output);
+            });
         }
 
         protected override void Dead()
