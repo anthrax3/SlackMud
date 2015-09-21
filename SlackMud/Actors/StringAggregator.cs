@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
+using System;
 
 namespace SlackMud
 {
@@ -8,35 +9,13 @@ namespace SlackMud
     {
         public static void Run(string format, IActorRef replyTo, IEnumerable<IActorRef> targets, object message)
         {
-            var props = Akka.Actor.Props.Create(() => new StringAggregator(format, replyTo, targets, message));
-            props.ActorOf();
-        }
-
-        public StringAggregator(string format, IActorRef replyTo, IEnumerable<IActorRef> targets, object message)
-        {
-            var targetArr = targets.ToArray();
-            var replies = new Dictionary<IActorRef, string>();
-            foreach (var target in targetArr)
+            Aggregator<string>.Run(targets, message, TimeSpan.FromSeconds(1))
+            .ContinueWith(t =>
             {
-                target.Tell(message, Self);
-            }
-            if (targetArr.Length == 0)
-            {
-                var joined = JoinNames(new string[0]);
-                replyTo.Tell(string.Format(format, joined));
-                Context.Stop(Self);
-            }
-
-            Receive<string>(msg =>
-            {
-                replies.Add(Sender, msg);
-                if (replies.Count == targetArr.Length)
-                {
-                    var names = replies.Values.ToArray();
-                    var joined = JoinNames(names);
-                    replyTo.Tell(new Notify(string.Format(format, joined)));
-                    Context.Stop(Self);
-                }
+                var strings = t.Result.Select(r => r.Result).ToArray();
+                var join = JoinNames(strings);
+                var result = new Notify(string.Format(format, join));
+                replyTo.Tell(result);                
             });
         }
 
