@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using SlackMud.Actors;
 
 namespace SlackMud
 {
@@ -31,7 +32,7 @@ namespace SlackMud
             Sender.Tell(new Died());
             HP = 0;
             IsAlive = false;
-            var corpse = Context.System.ActorOf(Props.Create(() => new Thing($"Corpse of {Name}")));
+            var corpse = Context.System.ActorOf(Props.Create(() => new Corpse($"Corpse of {Name}")));
             corpse.Tell(new SetContainer(MyContainer));
             MyContent.TellAll(new SetContainer(MyContainer));
             //remove self from container

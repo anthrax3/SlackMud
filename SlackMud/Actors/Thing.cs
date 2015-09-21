@@ -211,7 +211,7 @@ namespace SlackMud
             MyContainer
             .FindContainedObjectByName(msg.NameToFind, findResult =>
             {
-                if (findResult.Item == null)
+                if (!findResult.HasValue)
                 {
                     Self.Tell(new Notify($"Could not find {msg.NameToFind}"));
                 }
@@ -235,7 +235,7 @@ namespace SlackMud
             Self
             .FindContainedObjectByName(msg.Name, findResult =>
             {
-                if (findResult.Item == null)
+                if (!findResult.HasValue)
                 {
                     Self.Tell(new Notify($"Could not find {msg.Name}"));
                 }
@@ -262,13 +262,13 @@ namespace SlackMud
                 var t = t2?.Result?.Item != null ? t2 : t1;
                 var c = c2?.Result?.Item != null ? c2 : c1;
 
-                if (t.Result.Item == null)
+                if (!t.Result.HasValue)
                 {
                     self.Tell(new Notify($"Could not find {msg.TargetName}"));
                     return;
                 }
 
-                if (c.Result.Item == null)
+                if (!c.Result.HasValue)
                 {
                     self.Tell(new Notify($"Could not find {msg.ContainerName}"));
                     return;

@@ -13,6 +13,7 @@ namespace SlackMud
             {
                 var output = system.ActorOf<OutputActor>();
                 var room1 = system.ActorOf(Props.Create(() => new Thing("the kitchen")));
+                var helmet = system.ActorOf(Props.Create(() => new Thing("a crude helmet")));
                 var sword = system.ActorOf(Props.Create(() => new Weapon("a sword")));
                 var backpack = system.ActorOf(Props.Create(() => new Thing("a backpack")));
                 var player1 = system.ActorOf(Props.Create(() => new Player("Bilbo")));
@@ -21,7 +22,8 @@ namespace SlackMud
                 player1.Tell(new SetContainer(room1));
                 player2.Tell(new SetContainer(room1));
                 goblin.Tell(new SetContainer(room1));
-                sword.Tell(new SetContainer(room1));
+                helmet.Tell(new SetContainer(goblin));
+                sword.Tell(new SetContainer(goblin));
                 backpack.Tell(new SetContainer(player1));
                 player1.Tell(new SetOutput(output));
           //      player2.Tell(new SetOutput(output));

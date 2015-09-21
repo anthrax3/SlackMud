@@ -52,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Actors\Aggregator.cs" />
+    <Compile Include="Actors\Corpse.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Actors\Aggregator.FindByName.cs" />
     <Compile Include="Actors\Goblin.cs" />
