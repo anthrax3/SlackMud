@@ -26,10 +26,10 @@ namespace SlackMud
             return self.Ask<string>(new GetName()).ContinueWith(t => body(t.Result));
         }
 
-        public static Task FindContainedObjectByName(this IActorRef self,string name, Action<FoundObjectByName> body)
+        public static Task FindContainedObjectByName(this IActorRef self,string name, Action<FindObjectByNameResult> body)
         {
             return self
-               .Ask<FoundObjectByName>(new FindObjectByName(name))
+               .Ask<FindObjectByNameResult>(new FindObjectByName(name))
                .ContinueWith(t => body(t.Result));
         }
 
@@ -38,6 +38,13 @@ namespace SlackMud
             foreach(var target in targets)
             {
                 target.Tell(message);
+            }
+        }
+        public static void TellAll(this IEnumerable<IActorRef> targets, object message,IActorRef sender)
+        {
+            foreach (var target in targets)
+            {
+                target.Tell(message,sender);
             }
         }
 

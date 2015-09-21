@@ -130,15 +130,27 @@ namespace SlackMud
         public string Name { get; private set; }
     }
 
-    public class FoundObjectByName
+    public class FindObjectByNameResult
     {
-        public FoundObjectByName(IActorRef found, string name)
+        public FindObjectByNameResult()
+        {
+        }
+
+        public FindObjectByNameResult(IActorRef found, string name)
         {
             Item = found;
             Name = name;
         }
         public IActorRef Item { get; private set; }
         public string Name { get; private set; }
+
+        public bool HasValue
+        {
+            get
+            {
+                return Item != null;
+            }
+        }
     }
 
     public class MatchName

@@ -47,11 +47,7 @@ namespace SlackMud
             //add an item to the container, notify others in the same container
             Receive<ContainerAdd>(msg =>
             {
-                var sender = Sender;
-                msg
-                .ObjectToAdd
-                .GetName(name => new ContainerNotify($"{name} appears", msg.ObjectToAdd, sender))
-                .PipeTo(Self);
+                NotifyObjectAppears(msg.ObjectToAdd, Self, Sender);
 
                 MyContent.Add(msg.ObjectToAdd);
             });
@@ -130,6 +126,13 @@ namespace SlackMud
                     AttackTimer?.Cancel();
                 }
             });
+        }
+
+        private static void NotifyObjectAppears(IActorRef who,IActorRef self, IActorRef sender)
+        {
+            who
+            .GetName(name => new ContainerNotify($"{name} appears", who, sender))
+            .PipeTo(self);
         }
 
         protected virtual void NotifyCombatStatus()
@@ -238,10 +241,10 @@ namespace SlackMud
         {
             var self = Self;
             //TODO: this can be optimized to avoid ask
-            var t1 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.TargetName));
-            var c1 = MyContainer.Ask<FoundObjectByName>(new FindObjectByName(msg.ContainerName));
-            var t2 = Self.Ask<FoundObjectByName>(new FindObjectByName(msg.TargetName));
-            var c2 = Self.Ask<FoundObjectByName>(new FindObjectByName(msg.ContainerName));
+            var t1 = MyContainer.Ask<FindObjectByNameResult>(new FindObjectByName(msg.TargetName));
+            var c1 = MyContainer.Ask<FindObjectByNameResult>(new FindObjectByName(msg.ContainerName));
+            var t2 = Self.Ask<FindObjectByNameResult>(new FindObjectByName(msg.TargetName));
+            var c2 = Self.Ask<FindObjectByNameResult>(new FindObjectByName(msg.ContainerName));
 
             Task.WhenAll(t1, t2, c1, c2).ContinueWith(tasks =>
             {

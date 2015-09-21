@@ -9,59 +9,38 @@ namespace SlackMud
     {
         public static void Run(IActorRef replyTo, IEnumerable<IActorRef> targets, string nameToFind)
         {
-            var props = Props.Create(() => new FindByNameAggregator(replyTo, targets, nameToFind));
-            props.ActorOf();
-        }
-
-        public FindByNameAggregator(IActorRef replyTo, IEnumerable<IActorRef> targets, string nameToFind)
-        {
-            var targetArr = targets.ToArray();
-            var replies = new Dictionary<IActorRef, string>();
-
-            if (targetArr.Length == 0)
+            nameToFind = SimplifyName(nameToFind);
+            var task = Aggregator<string>.Run(targets, new GetName(), TimeSpan.FromSeconds(1));
+            task.ContinueWith(t =>
             {
-                replyTo.Tell(new FoundObjectByName(null,null));
-                Context.Stop(Self);
-            }
-
-            foreach (var target in targetArr)
-            {
-                target.Tell(new GetName(), Self);
-            }
-
-            SetReceiveTimeout(TimeSpan.FromSeconds(1));
-
-            //in case we get no results, timeout
-            Receive<ReceiveTimeout>(msg =>
-            {
-                replyTo.Tell(new FoundObjectByName(null, null));
-                Context.Stop(Self);
-            });
-
-            Receive<string>(msg =>
-            {
-                var toFind = nameToFind.ToLowerInvariant();
-                if (toFind.StartsWith("the "))
-                    toFind = toFind.Substring(4);
-                else if (toFind.StartsWith("a "))
-                    toFind = toFind.Substring(2);
-                else if (toFind.StartsWith("an "))
-                    toFind = toFind.Substring(3);
-
-                if (msg.ToLowerInvariant().Contains(toFind))
+                if (t.Result.Length == 0)
                 {
-                    replyTo.Tell(new FoundObjectByName(Sender,msg));
-                    Context.Stop(Self);
+                    replyTo.Tell(new FindObjectByNameResult());
                     return;
                 }
 
-                replies.Add(Sender, msg);
-                if (replies.Count == targetArr.Length)
+                foreach(var res in t.Result)
                 {
-                    replyTo.Tell(new FoundObjectByName(null,null));
-                    Context.Stop(Self);
+                    if (res.Result.ToLowerInvariant().Contains(nameToFind))
+                    {
+                        replyTo.Tell(new FindObjectByNameResult(res.Source, res.Result));
+                        return;
+                    }
                 }
+                replyTo.Tell(new FindObjectByNameResult());
             });
+        }
+
+        private static string SimplifyName(string nameToFind)
+        {
+            var toFind = nameToFind.ToLowerInvariant();
+            if (toFind.StartsWith("the "))
+                toFind = toFind.Substring(4);
+            else if (toFind.StartsWith("a "))
+                toFind = toFind.Substring(2);
+            else if (toFind.StartsWith("an "))
+                toFind = toFind.Substring(3);
+            return toFind;
         }
     }
 }
